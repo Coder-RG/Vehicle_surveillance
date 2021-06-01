@@ -1,2 +1,4 @@
 venv/
 Plate_detect_and_recognize/
+.ipynb_checkpoints/
+__pycache__/
