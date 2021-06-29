@@ -1,5 +1,7 @@
 # remove warning message
 import os
+import os.path
+import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # required by wpod-net
@@ -15,6 +17,8 @@ from tensorflow.keras.models import model_from_json
 # from sklearn.preprocessing import LabelEncoder
 # import glob
 from imageio import imwrite
+import logging
+logging.getLogger().setLevel(logging.ERROR)
 
 def load_model(path):
     try:
@@ -33,6 +37,7 @@ wpod_net = load_model(wpod_net_path)
 
 def preprocess_image(image_path,resize=False):
     img = cv2.imread(image_path)
+    # cv2.imshow(img)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img / 255
     if resize:
@@ -47,21 +52,19 @@ def get_plate(image_path, Dmax=608, Dmin = 608):
     _ , LpImg, _, cor = detect_lp(wpod_net, vehicle, bound_dim, lp_threshold=0.5)
     return vehicle, LpImg, cor
 
-test_image_path = "Plate_examples/india_multi_car.jpg"
-vehicle, LpImg,cor = get_plate(test_image_path)
+def delete_prev_plates():
+    with os.scandir("plates/") as scanner:
+        for plate in scanner:
+            os.remove(plate)
 
-for index,i in enumerate(LpImg):
-    imwrite("LP{}.png".format(index), i)
-
-def FrameCapture(path):
-    vidObj = cv2.VideoCapture(path)
+def main():
+    delete_prev_plates()
     count = 0
-    # checks whether frames were extracted
-    success = 1
-    while success:
-        # vidObj object calls read
-        # function extract frames
-        success, image = vidObj.read()
-        # Saves the frames with frame-count
-        cv2.imwrite("frame%d.jpg" % count, image)
-        count += 1
+    for file in os.listdir("frames/"):
+        vehicle, LpImg,cor = get_plate(os.path.join("frames",file))
+        for i in LpImg:
+            imwrite("plates/LP{}.png".format(count), i)
+            count += 1
+
+if __name__ == "__main__":
+    main()
