@@ -11,7 +11,7 @@ class NoFileAccess(Exception):
     def __init__(self, file_name):
         self.message = "\033[31mError:\033[0m Cannot acces file: {}".format(file_name)
 
-def delete_pre_frames():
+def delete_prev_frames():
     with os.scandir("frames/") as scanner:
         for frame in scanner:
             os.remove(frame)
@@ -39,7 +39,7 @@ def main():
     except Exception as e:
         print(e.message)
         sys.exit(1)
-    delete_pre_frames()
+    delete_prev_frames()
     frameCapture()
 
 if __name__ == "__main__":
